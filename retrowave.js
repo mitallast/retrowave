@@ -12,8 +12,8 @@ const scene = new THREE.Scene();
 const gridWidth = 60;
 const gridLength = 100;
 const rectWidth = 4;
-const rectLength = 4;
-const rectHeight = 4;
+const rectLength = 6;
+const rectHeight = 6;
 
 const pointLight = new THREE.PointLight(0xFFFFFF, 2, gridLength * rectLength);
 pointLight.position.set(gridWidth / 2 * rectWidth, 0, 1);
@@ -24,7 +24,8 @@ scene.add(ambientLight);
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
 camera.position.set(gridWidth / 2 * rectWidth, 0, 10);
-camera.lookAt(gridWidth / 2 * rectWidth, gridLength, 10);
+camera.up = new THREE.Vector3(0, 0, 1);
+camera.lookAt(gridWidth / 2 * rectWidth, 10, 11);
 
 function handleResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -54,7 +55,7 @@ function randomGridRow() {
   for (let x = 0; x <= gridWidth; x++) {
     const n = Math.max(0, noise.simplex2(x / scale, yCounter / scale));
     const r = Math.log(0.5 + Math.abs(x - gridWidth / 2) / roadWidth);
-    row[x] = Math.max(0, Math.pow(n, 2.4) * 5 * r);
+    row[x] = Math.max(0, Math.pow(n, 2.5) * 5 * r);
   }
   return row;
 }
