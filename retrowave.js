@@ -4,6 +4,8 @@ const THREE = window.THREE;
 const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.domElement.style.backgroundImage = "linear-gradient(rgb(57,58,137), rgb(200,17,116), rgb(57,58,137))";
 document.body.appendChild(renderer.domElement);
 
@@ -15,12 +17,13 @@ const rectWidth = 4;
 const rectLength = 6;
 const rectHeight = 6;
 
-const pointLight = new THREE.PointLight(0xFFFFFF, 2, gridLength * rectLength);
-pointLight.position.set(gridWidth / 2 * rectWidth, 0, 1);
+const pointLight = new THREE.PointLight(0xFFFFFF, 1, gridLength * rectLength);
+pointLight.castShadow = true;
+pointLight.position.set(gridWidth / 2 * rectWidth, 100, 100);
 scene.add(pointLight);
 
-const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5); // soft white light
-scene.add(ambientLight);
+// const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5); // soft white light
+// scene.add(ambientLight);
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
 camera.position.set(gridWidth / 2 * rectWidth, 0, 10);
@@ -156,13 +159,47 @@ function updateVertices() {
   geometry.computeVertexNormals();
 }
 
-const meshMaterial = new THREE.MeshStandardMaterial({vertexColors: THREE.VertexColors, side: THREE.DoubleSide});
+const meshMaterial = new THREE.MeshStandardMaterial({
+  vertexColors: THREE.VertexColors,
+  side: THREE.DoubleSide
+});
 const mesh = new THREE.Mesh(geometry, meshMaterial);
+mesh.castShadow = false;
+mesh.receiveShadow = true;
 scene.add(mesh);
 
 const lineMaterial = new THREE.LineBasicMaterial({color: 0xffffff});
 const line = new THREE.LineSegments(geometry, lineMaterial);
 scene.add(line);
+
+
+const loader = new THREE.STLLoader();
+loader.load('3d-model.stl', function (geometry) {
+  console.log("loaded");
+  const carScale = 5;
+  const material = new THREE.MeshPhongMaterial({
+    color: 0xff0000,
+  });
+  const car = new THREE.Mesh(geometry, material);
+  car.position.set(gridWidth / 2 * rectWidth, 50, 0);
+  car.scale.set(carScale, -carScale, carScale);
+  car.castShadow = true;
+  car.receiveShadow = false;
+  scene.add(car);
+
+  // back fars
+
+  const far1 = new THREE.PointLight(0xff0000, 1, 10, 10);
+  far1.position.set(gridWidth / 2 * rectWidth - 1.8, 44, 2);
+  scene.add(far1);
+
+  const far2 = new THREE.PointLight(0xff0000, 1, 10, 10);
+  far2.position.set(gridWidth / 2 * rectWidth + 1.8, 44, 2);
+  scene.add(far2);
+
+  window.far1 = far1;
+});
+
 
 function render() {
   requestAnimationFrame(render);
